@@ -26,7 +26,8 @@ blueprint:
       description: Light or lights to control with the specified remote
       selector:
         target:
-          domain: light
+          entity:
+            domain: light
 
 mode: queued
 max_exceeded: silent
