@@ -72,12 +72,7 @@ action:
         data:
           brightness_step: 1
       # Decrease brightness button hold
-    - conditions: 
-        - "{{ (trigger.event.data.event | int) == 3001 }}"
-        - condition: numeric_state
-          target: !input light_target
-          attribute: brightness
-          above: 1
+    - conditions: "{{ (trigger.event.data.event | int) == 3001 }}"
       sequence:
         service: light.turn_on
         target: !input light_target
