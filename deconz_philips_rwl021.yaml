@@ -1,0 +1,84 @@
+blueprint:
+  name: Philipe Hue Dimmer Switch (RWL021)
+  description: |
+    Blueprint that utilizes a Philips Hue Dimmer Switch (RWL021) from the deCONZ integration to control one or more lights.
+
+     ➡ Pressing the on button will turn the light on
+     ➡ Pressing the increase brightness button will increase the brightness with 5%
+     ➡ Pressing the decrease brightness button will decrease the brightness with 5%, but cannot turn the light off
+     ➡ Pressing the off button will turn the light off
+
+     ➡ Holding the increase brightness button will continuously increase the brightness with a single step
+     ➡ Holding the decrease brightness button will continuously decrease the brightness with a single step
+  domain: automation
+  source_url: https://github.com/alex3305/home-assistant-blueprints/blob/master/deconz_philips_rwl021.yaml
+  input:
+    dimmer_switch:
+      name: Philips Hue Dimmer Switch (RWL021)
+      description: Philips Hue Dimmer Switch to use
+      selector:
+        device: 
+          integration: deconz
+          manufacturer: Philips
+          model: RWL021
+    light_target:
+      name: Light or lights
+      description: Light or lights to control with the specified remote
+      selector:
+        target:
+          domain: light
+
+mode: queued
+max_exceeded: silent
+
+trigger:
+  platform: event
+  event_type: deconz_event
+  event_data:
+    id: !input dimmer_switch
+
+action:
+  choose:
+      # On button press
+    - conditions: "{{ (trigger.event.data.event | int) == 1002 }}"
+      sequence:
+        service: light.turn_on
+        target: !input light_target
+      # Off button press
+    - conditions: "{{ (trigger.event.data.event | int) == 4002 }}"
+      sequence:
+        service: light.turn_off
+        target: !input light_target
+      # Increase brightness button press
+    - conditions: "{{ (trigger.event.data.event | int) == 2002 }}"
+      sequence:
+        service: light.turn_on
+        target: !input light_target
+        data:
+          brightness_step_pct: 5
+      # Decrease brightness button press
+    - conditions: "{{ (trigger.event.data.event | int) == 3002 }}"
+      sequence:
+        service: light.turn_on
+        target: !input light_target
+        data:
+          brightness_step_pct: -5
+      # Increase brightness button hold
+    - conditions: "{{ (trigger.event.data.event | int) == 2001 }}"
+      sequence:
+        service: light.turn_on
+        target: !input light_target
+        data:
+          brightness_step: 1
+      # Decrease brightness button hold
+    - conditions: 
+        - "{{ (trigger.event.data.event | int) == 3001 }}"
+        - condition: numeric_state
+          entity_id: !input light_target
+          attribute: brightness
+          above: 1
+      sequence:
+        service: light.turn_on
+        target: !input light_target
+        data:
+          brightness_step: 1
