@@ -22,8 +22,8 @@ blueprint:
           manufacturer: Philips
           model: RWL021
     light_target:
-      name: Light or lights
-      description: Light or lights to control with the specified remote
+      name: Light
+      description: Light or lights to control with the remote control
       selector:
         target:
           entity:
