@@ -75,7 +75,7 @@ action:
     - conditions: 
         - "{{ (trigger.event.data.event | int) == 3001 }}"
         - condition: numeric_state
-          entity_id: !input light_target
+          target: !input light_target
           attribute: brightness
           above: 1
       sequence:
