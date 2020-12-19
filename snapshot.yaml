@@ -57,7 +57,7 @@ condition:
     - condition: and
       conditions:
         - "{{ not every_day_bool }}"
-        - "{{ ((day_number | int) + 1) == (now().weekday() | int) }}"
+        - "{{ ((day_number | int) - 1) == (now().weekday() | int) }}"
 
 action:
   choose:
