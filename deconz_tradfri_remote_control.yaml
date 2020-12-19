@@ -1,0 +1,118 @@
+blueprint:
+  name: IKEA TRÅDFRI Remote Control
+  description: |
+    Blueprint that utilizes an IKEA TRÅDFRI Remote Control from the deCONZ integration to control one or more lights.
+
+     ➡ Pressing the on/off button will toggle the lights
+     ➡ Pressing the 🔆 button will increase the brightness with 5%
+     ➡ Pressing the 🔅 button will decrease the brightness with 5%
+     ➡ Pressing the ◀ button will choose the previous color
+     ➡ Pressing the ▶ button will choose the next color
+    
+    Note: For color support you will need an input_select with the colors you want to utilize.
+          The currently supported colors are: 
+            - white
+            - warm-white
+            - cold-white
+            - yellow
+            - orange
+            - red
+            - purple
+            - blue
+            - cyan
+            - green
+  domain: automation
+  source_url: https://github.com/alex3305/home-assistant-blueprints/blob/master/deconz_tradfri_remote_control.yaml
+  input:
+    remote:
+      name: IKEA TRÅDFRI Remote Control
+      description: IKEA TRÅDFRI Remote Control to utilize
+      selector:
+        device:
+          integration: deconz
+          manufacturer: IKEA of Sweden
+          model: TRADFRI remote control
+    color_select:
+      name: color selecter
+      description: Input select with the colors you want to utilize
+      selector:
+        entity:
+          domain: input_select
+    light_target:
+      name: Light
+      description: Light or lights to control with the remote control
+      selector:
+        target:
+          entity:
+            domain: light
+
+variables:
+  input_select_color: !input color_select
+  color_map:
+    white: [255, 255, 255]
+    warm-white: [255, 200, 120]
+    cold-white: [255, 120, 200]
+    yellow: [255, 255, 0]
+    orange: [255, 128, 0]
+    red: [255, 0, 0]
+    purple: [255, 0, 255]
+    blue: [0, 0, 255]
+    cyan: [0, 255, 255]
+    green: [0, 255, 0]
+
+mode: queued
+max_exceeded: silent
+
+trigger:
+  platform: event
+  event_type: deconz_event
+  event_data:
+    device_id: !input remote
+
+action:
+  choose:
+      # On/off button press
+    - conditions: "{{ (trigger.event.data.event | int) == 1002 }}"
+      sequence:
+        service: light.toggle
+        target: !input light_target
+      # Increase brightness button press
+    - conditions: "{{ (trigger.event.data.event | int) == 2002 }}"
+      sequence:
+        service: light.turn_on
+        target: !input light_target
+        data:
+          brightness_step_pct: 5
+      # Decrease brightness button press
+    - conditions: "{{ (trigger.event.data.event | int) == 3002 }}"
+      sequence:
+        service: light.turn_on
+        target: !input light_target
+        data:
+          brightness_step_pct: -5
+      # Left button press
+    - conditions: "{{ (trigger.event.data.event | int) == 4002 }}"
+      sequence:
+        - service: input_select.select_previous
+          entity_id: !input color_select
+        - service: light.turn_on
+          target: !input light_target
+          data:
+            rgb_color: >-
+              {% set val = color_map[states('input_select_color')] %}
+              {% if val != 'unknown' %}
+                {{ val }}
+              {% endif %}
+      # Right button press
+    - conditions: "{{ (trigger.event.data.event | int) == 5002 }}"
+      sequence:
+        - service: input_select.select_next
+          entity_id: !input color_select
+        - service: light.turn_on
+          target: !input light_target
+          data:
+            rgb_color: >-
+              {% set val = color_map[states('input_select_color')] %}
+              {% if val != 'unknown' %}
+                {{ val }}
+              {% endif %}

@@ -3,10 +3,10 @@ blueprint:
   description: |
     Blueprint that utilizes a Philips Hue Dimmer Switch (RWL021) from the deCONZ integration to control one or more lights.
 
-     ➡ Pressing the on button will turn the light on
-     ➡ Pressing the increase brightness button will increase the brightness with 5%
-     ➡ Pressing the decrease brightness button will decrease the brightness with 5%, but cannot turn the light off
-     ➡ Pressing the off button will turn the light off
+     ➡ Pressing the | button will turn the light on
+     ➡ Pressing the 🔆 button will increase the brightness with 5%
+     ➡ Pressing the 🔅 button will decrease the brightness with 5%
+     ➡ Pressing the ⚪ button will turn the light off
 
      ➡ Holding the increase brightness button will continuously increase the brightness with a single step
      ➡ Holding the decrease brightness button will continuously decrease the brightness with a single step
