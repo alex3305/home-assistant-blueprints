@@ -32,7 +32,7 @@ blueprint:
       description: When every day is disabled, select a day number to run this automation
       selector:
         number:
-          min: 1
+          min: 0
           max: 7
           step: 1
           unit_of_measurement: day
