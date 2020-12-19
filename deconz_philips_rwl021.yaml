@@ -77,4 +77,4 @@ action:
         service: light.turn_on
         target: !input light_target
         data:
-          brightness_step: 1
+          brightness_step: -1
