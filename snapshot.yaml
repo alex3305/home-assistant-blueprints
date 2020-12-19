@@ -1,0 +1,77 @@
+blueprint:
+  name: Create snapshot
+  description: |
+    Creates a snapshot of your Home Assistant installation.
+
+    You can choose whether you want to create a full Home Assistant system or a partial snapshot.
+
+    A partial snapshot will only create a snapshot of the following:
+      - Home Assistant configuration directory
+      - Add-ons SSL directory
+      - Add-ons share directory
+  domain: automation
+  source_url: https://github.com/alex3305/home-assistant-blueprints/blob/master/snapshot.yaml
+  input:
+    time_trigger:
+      name: Time to trigger the snapshot
+      description: The snapshot will be created at this time
+      selector:
+        time:
+    full_snapshot:
+      name: Create a full snapshot?
+      description: When enabled, a full snapshot will be created. Otherwise only a partial snapshot is created.
+      selector:
+        boolean:
+    every_day:
+      name: Run every day of the week?
+      description: When enabled, this automation will run every day of the week
+      selector:
+        boolean: 
+    snapshot_day:
+      name: Day of the week
+      description: When every day is disabled, select a day number to run this automation
+      selector:
+        number:
+          min: 1
+          max: 7
+          step: 1
+          unit_of_measurement: day
+          mode: box
+
+mode: single
+max_exceeded: silent
+
+variables:
+  full_snapshot_bool: !input full_snapshot
+  every_day_bool: !input every_day
+  day_number: !input snapshot_day
+
+trigger:
+  platform: time
+  at: !input time_trigger
+
+condition:
+  condition: or
+  conditions:
+    - "{{ every_day_bool }}"
+    - condition: and
+      conditions:
+        - "{{ not every_day_bool }}"
+        - "{{ ((day_number | int) + 1) == (now().weekday() | int) }}"
+
+action:
+  choose:
+    - conditions: "{{ full_snapshot_bool }}"
+      sequence:
+        service: hassio.snapshot_full
+        data:
+          name: "Automated full snapshot {{ now().strftime('%Y-%m-%d') }}"
+    - conditions: "{{ not full_snapshot_bool }}"
+      sequence:
+        service: hassio.snapshot_partial
+        data:
+          name: "Automated partial snapshot {{ now().strftime('%Y-%m-%d') }}"
+          folders:
+            - homeassistant
+            - ssl
+            - share
