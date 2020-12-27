@@ -1,0 +1,78 @@
+blueprint:
+  name: Z-Wave set wakeup interval for device
+  description: |
+    Sets the wake up interval for a device based on presence. 
+  domain: automation
+  source_url: https://github.com/alex3305/home-assistant-blueprints/blob/master/zwave_set_wakeup.yaml
+  input:
+    presence_input:
+      name: Presence sensor
+      description: Input device to trigger presence or the lack there of
+      selector:
+        entity:
+          domain: binary_sensor
+    zwave_device:
+      name: Z-Wave device
+      description: Z-Wave device to set the wakeup interval for
+      selector:
+        entity:
+          domain: zwave
+    presence_interval:
+      name: Presence interval
+      description: Z-Wave wake up interval in seconds when there is presence detected
+      selector:
+        number:
+          min: 60
+          max: 900
+          step: 10
+          unit_of_measurement: sec
+          mode: box
+      default: 300
+    no_presence_interval:
+      name: No presence interval
+      description: Z-Wave wake up interval in seconds when there is no presence detected
+      selector:
+        number:
+          min: 60
+          max: 900
+          step: 10
+          unit_of_measurement: sec
+          mode: box
+      default: 600
+
+mode: single
+max_exceeded: silent
+
+variables:
+  zw_dev: !input zwave_device
+
+trigger:
+  platform: state
+  entity_id: !input presence_input
+
+conditions:
+  condition: or
+  conditions:
+    - "{{ not is_state(zw_dev, 'unavailable') }}"
+    - "{{ not is_state(zw_dev, 'initializing') }}"
+
+action:
+  choose:
+    - conditions:
+        platform: state
+        entity_id: !input presence_input
+        state: 'on'
+      sequence:
+        service: zwave.set_wakeup
+        data:
+          node_id: "{{ state_attr(zw_dev, 'node_id') | int }}"
+          value: !input presence_interval
+    - conditions:
+        platform: state
+        entity_id: !input presence_input
+        state: 'off'
+      sequence:
+        service: zwave.set_wakeup
+        data:
+          node_id: "{{ state_attr(zw_dev, 'node_id') | int }}"
+          value: !input no_presence_interval

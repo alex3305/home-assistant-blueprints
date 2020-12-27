@@ -1,0 +1,32 @@
+blueprint:
+  name: Scheduled task
+  description: |
+    Runs a scheduled task (or in fact a service call) defined by one or more actions
+  domain: automation
+  source_url: https://github.com/alex3305/home-assistant-blueprints/blob/master/scheduled_task.yaml
+  input:
+    time_trigger:
+      name: Time to trigger the task
+      description: The choosen action(s) below will be triggered at this time
+      selector:
+        time:
+      default: '06:00:00'
+    action_input:
+      name: Action(s) to trigger
+      description: Choose one or more action to trigger at the defined time
+      selector:
+        action:
+      default:
+        - service: logbook.log
+          data:
+            name: 'Scheduled task'
+            message: 'Triggered by automation!'
+
+mode: single
+max_exceeded: silent
+
+trigger:
+  platform: time
+  at: !input time_trigger
+
+action: !input action_input
