@@ -50,7 +50,7 @@ trigger:
   platform: state
   entity_id: !input presence_input
 
-conditions:
+condition:
   condition: or
   conditions:
     - "{{ not is_state(zw_dev, 'unavailable') }}"
@@ -59,7 +59,7 @@ conditions:
 action:
   choose:
     - conditions:
-        platform: state
+        condition: state
         entity_id: !input presence_input
         state: 'on'
       sequence:
@@ -68,7 +68,7 @@ action:
           node_id: "{{ state_attr(zw_dev, 'node_id') | int }}"
           value: !input presence_interval
     - conditions:
-        platform: state
+        condition: state
         entity_id: !input presence_input
         state: 'off'
       sequence:

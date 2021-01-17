@@ -90,4 +90,4 @@ action:
               - ssl
               - share
   - choose:
-      default: !input post_snapshot_action
+    default: !input post_snapshot_action
