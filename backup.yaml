@@ -1,26 +1,26 @@
 blueprint:
-  name: Create snapshot
+  name: Create backup
   description: |
-    Creates a snapshot of your Home Assistant installation.
+    Creates a backup of your Home Assistant installation.
 
-    You can choose whether you want to create a full Home Assistant system or a partial snapshot.
+    You can choose whether you want to create a full Home Assistant system or a partial backup.
 
-    A partial snapshot will only create a snapshot of the following:
+    A partial backup will only create a backup of the following:
       - Home Assistant configuration directory
       - Add-ons SSL directory
       - Add-ons share directory
   domain: automation
-  source_url: https://github.com/alex3305/home-assistant-blueprints/blob/master/snapshot.yaml
+  source_url: https://github.com/alex3305/home-assistant-blueprints/blob/master/backup.yaml
   input:
     time_trigger:
-      name: Time to trigger the snapshot
-      description: The snapshot will be created at this time
+      name: Time to trigger the backup
+      description: The backup will be created at this time
       selector:
         time:
       default: '06:00:00'
-    full_snapshot:
-      name: Create a full snapshot?
-      description: When enabled, a full snapshot will be created. Otherwise only a partial snapshot is created.
+    full_backup:
+      name: Create a full backup?
+      description: When enabled, a full backup will be created. Otherwise only a partial backup is created.
       selector:
         boolean:
       default: true
@@ -30,7 +30,7 @@ blueprint:
       selector:
         boolean: 
       default: true
-    snapshot_day:
+    backup_day:
       name: Day of the week
       description: When every day is disabled, select a day number to run this automation
       selector:
@@ -41,24 +41,24 @@ blueprint:
           unit_of_measurement: day
           mode: box
       default: 0
-    post_snapshot_action:
-      name: Post snapshot action
-      description: Action to perform when the snapshot has been taken
+    post_backup_action:
+      name: Post backup action
+      description: Action to perform when the backup has been taken
       selector:
         action:
       default:
         - service: logbook.log
           data:
-            name: Snapshot service
-            message: Snapshot succesfully created!
+            name: backup service
+            message: backup succesfully created!
 
 mode: single
 max_exceeded: silent
 
 variables:
-  full_snapshot_bool: !input full_snapshot
+  full_backup_bool: !input full_backup
   every_day_bool: !input every_day
-  day_number: !input snapshot_day
+  day_number: !input backup_day
 
 trigger:
   platform: time
@@ -75,19 +75,19 @@ condition:
 
 action:
   - choose:
-      - conditions: "{{ full_snapshot_bool }}"
+      - conditions: "{{ full_backup_bool }}"
         sequence:
-          service: hassio.snapshot_full
+          service: hassio.backup_full
           data:
-            name: "Automated full snapshot {{ now().strftime('%Y-%m-%d') }}"
-      - conditions: "{{ not full_snapshot_bool }}"
+            name: "Automated full backup {{ now().strftime('%Y-%m-%d') }}"
+      - conditions: "{{ not full_backup_bool }}"
         sequence:
-          service: hassio.snapshot_partial
+          service: hassio.backup_partial
           data:
-            name: "Automated partial snapshot {{ now().strftime('%Y-%m-%d') }}"
+            name: "Automated partial backup {{ now().strftime('%Y-%m-%d') }}"
             folders:
               - homeassistant
               - ssl
               - share
   - choose:
-    default: !input post_snapshot_action
+    default: !input post_backup_action
