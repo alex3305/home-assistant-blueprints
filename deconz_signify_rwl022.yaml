@@ -1,7 +1,7 @@
 blueprint:
-  name: Philips Hue Dimmer Switch (RWL021)
+  name: Signify Hue Dimmer Switch (RWL022)
   description: |
-    Blueprint that utilizes a Philips Hue Dimmer Switch (RWL021) from the deCONZ integration to control one or more lights.
+    Blueprint that utilizes a Signify Hue Dimmer Switch (RWL022) from the deCONZ integration to control one or more lights.
 
      ➡ Pressing the | button will turn the light on
      ➡ Pressing the 🔆 button will increase the brightness with 5%
@@ -14,13 +14,13 @@ blueprint:
   source_url: https://github.com/alex3305/home-assistant-blueprints/blob/master/deconz_philips_rwl021.yaml
   input:
     dimmer_switch:
-      name: Philips Hue Dimmer Switch (RWL021)
+      name: Signify Hue Dimmer Switch (RWL022)
       description: Philips Hue Dimmer Switch to use
       selector:
         device: 
           integration: deconz
-          manufacturer: Philips
-          model: RWL021
+          manufacturer: Signify Netherlands B.V.
+          model: RWL022
     light_target:
       name: Light
       description: Light or lights to control with the remote control
@@ -40,15 +40,10 @@ trigger:
 
 action:
   choose:
-      # On button press
+      # Toggle button press
     - conditions: "{{ (trigger.event.data.event | int) == 1002 }}"
       sequence:
-        service: light.turn_on
-        target: !input light_target
-      # Off button press
-    - conditions: "{{ (trigger.event.data.event | int) == 4002 }}"
-      sequence:
-        service: light.turn_off
+        service: light.toggle
         target: !input light_target
       # Increase brightness button press
     - conditions: "{{ (trigger.event.data.event | int) == 2002 }}"
@@ -78,3 +73,4 @@ action:
         target: !input light_target
         data:
           brightness_step: -1
+      # TODO Implement Hue button
